@@ -1,0 +1,66 @@
+[
+  {
+    "Type": "unit",
+    "From": "Meter",
+    "To": "Kilometer",
+    "Value": 15,
+    "Result": 0.015,
+    "Timestamp": "2025-04-01T16:58:44.0916437+00:00"
+  },
+  {
+    "Type": "unit",
+    "From": "Kilometer",
+    "To": "Meter",
+    "Value": 854,
+    "Result": 854000,
+    "Timestamp": "2025-04-01T17:04:05.7636086+00:00"
+  },
+  {
+    "Type": "currency",
+    "From": "USD",
+    "To": "RUB",
+    "Value": 15,
+    "Result": 1260.39279,
+    "Timestamp": "2025-04-01T17:04:19.1511347+00:00"
+  },
+  {
+    "Type": "currency",
+    "From": "RUB",
+    "To": "KZT",
+    "Value": 7500,
+    "Result": 45146.5275,
+    "Timestamp": "2025-04-01T17:04:35.1353322+00:00"
+  },
+  {
+    "Type": "unit",
+    "From": "Feet",
+    "To": "Kilometer",
+    "Value": 23,
+    "Result": 0.007544,
+    "Timestamp": "2025-04-02T01:50:14.0166934+00:00"
+  },
+  {
+    "Type": "currency",
+    "From": "USD",
+    "To": "AED",
+    "Value": 157313,
+    "Result": 577731.9925,
+    "Timestamp": "2025-04-02T01:50:45.5700614+00:00"
+  },
+  {
+    "Type": "unit",
+    "From": "Kilometer",
+    "To": "Feet",
+    "Value": 15,
+    "Result": 49212.600000000006,
+    "Timestamp": "2025-04-02T06:17:10.4916409+00:00"
+  },
+  {
+    "Type": "currency",
+    "From": "RUB",
+    "To": "RUB",
+    "Value": 7587,
+    "Result": 7587,
+    "Timestamp": "2025-04-02T06:17:50.2079086+00:00"
+  }
+]

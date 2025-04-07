@@ -1,0 +1,196 @@
+﻿.
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Конвертер</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        form {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background: white;
+        }
+
+        label, select, input {
+            display: block;
+            margin: 10px 0;
+            width: 100%;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+
+        #result-units, #result-currency {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f0fe;
+            border: 1px solid #90caf9;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #e0e0e0;
+        }
+
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #aaa;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Конвертер физических величин</h1>
+    <form id="unit-form">
+        <label>Значение:</label>
+        <input type="number" id="unit-value" required>
+        <label>Из:</label>
+        <select id="unit-from">
+            <option value="Meter">Метры</option>
+            <option value="Kilometer">Километры</option>
+            <option value="Miles">Мили</option>
+            <option value="Feet">Футы</option>
+        </select>
+        <label>В:</label>
+        <select id="unit-to">
+            <option value="Meter">Метры</option>
+            <option value="Kilometer">Километры</option>
+            <option value="Miles">Мили</option>
+            <option value="Feet">Футы</option>
+        </select>
+        <button type="submit">Конвертировать</button>
+        <button type="button" onclick="fetchUnitHistory()">Показать историю (таблица)</button>
+        <div id="result-units"></div>
+        <div id="history-units"></div>
+    </form>
+
+    <h1>Конвертер валют</h1>
+    <form id="currency-form">
+        <label>Сумма:</label>
+        <input type="number" id="currency-value" required>
+        <label>Из валюты:</label>
+        <select id="currency-from">
+            <option value="RUB">RUB</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="KZT">KZT</option>
+            <option value="AED">AED</option>
+            <option value="CNY">CNY</option>
+        </select>
+        <label>В валюту:</label>
+        <select id="currency-to">
+            <option value="RUB">RUB</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="KZT">KZT</option>
+            <option value="AED">AED</option>
+            <option value="CNY">CNY</option>
+        </select>
+        <button type="submit">Конвертировать</button>
+        <button type="button" onclick="fetchCurrencyHistory()">Показать историю (таблица)</button>
+        <div id="result-currency"></div>
+        <div id="history-currency"></div>
+    </form>
+
+    <iframe id="xml-frame" style="display:none;"></iframe>
+
+    <script>
+        document.getElementById("unit-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const input = document.getElementById("unit-value");
+            const value = input.value;
+            const from = document.getElementById("unit-from").value;
+            const to = document.getElementById("unit-to").value;
+            const res = await fetch("/api/conversion/convert/units", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ value, from, to })
+            });
+            const data = await res.json();
+            document.getElementById("result-units").textContent = data.result;
+            fetchUnitHistory();
+            input.value = ""; // Очистка поля ввода
+        });
+
+        async function fetchUnitHistory() {
+            const res = await fetch("/api/conversion/units/history?format=json");
+            const data = await res.json();
+            document.getElementById("history-units").innerHTML = renderTable(data);
+        }
+
+        document.getElementById("currency-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const input = document.getElementById("currency-value");
+            const value = input.value;
+            const from = document.getElementById("currency-from").value;
+            const to = document.getElementById("currency-to").value;
+            const res = await fetch("/api/currency/convert", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: value, from, to })
+            });
+            const data = await res.json();
+            document.getElementById("result-currency").textContent = data.result;
+            fetchCurrencyHistory();
+            input.value = ""; // Очистка поля ввода
+        });
+
+        async function fetchCurrencyHistory() {
+            const res = await fetch("/api/currency/history?format=json");
+            const data = await res.json();
+            document.getElementById("history-currency").innerHTML = renderTable(data);
+        }
+
+        function renderTable(data) {
+            if (!data.length) return "<p>История пуста.</p>";
+            const rows = data.map(row => `
+                    <tr>
+                        <td>${row.type}</td>
+                        <td>${row.from}</td>
+                        <td>${row.to}</td>
+                        <td>${row.value}</td>
+                        <td>${row.result}</td>
+                        <td>${row.timestamp}</td>
+                    </tr>`).join("");
+            return `
+                    <table>
+                        <tr><th>Тип</th><th>Из</th><th>В</th><th>Значение</th><th>Результат</th><th>Дата</th></tr>
+                        ${rows}
+                    </table>`;
+        }
+
+        function loadXmlHistory(type) {
+            const url = type === 'units'
+                ? '/api/conversion/units/history?format=xml'
+                : '/api/currency/history?format=xml';
+            const frame = document.getElementById("xml-frame");
+            frame.src = url;
+            frame.style.display = "block";
+        }
+    </script>
+</body>
+</html>
